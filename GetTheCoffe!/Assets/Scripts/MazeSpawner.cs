@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MyBox;
 public class MazeSpawner : MonoBehaviour
 {
     public enum MazeGenerationAlgorithm
@@ -20,9 +21,26 @@ public class MazeSpawner : MonoBehaviour
     public bool AddGaps = false;
     public GameObject GoalPrefab = null;
     private BasicMazeGenerator mMazeGenerator = null;
-    // Start is called before the first frame update
-    void Start()
+
+    public static T SafeDestroy<T>(T obj) where T : Object
     {
+        if (Application.isEditor)
+            Object.DestroyImmediate(obj);
+        else
+            Object.Destroy(obj);
+
+        return null;
+    }
+
+#if UNITY_EDITOR
+    [ButtonMethod]
+    private void CreateMaze()
+    {
+        RandomSeed = Random.Range(0, 99999);
+        for (var i = gameObject.transform.childCount - 1; i >= 0; i--)
+        {
+            SafeDestroy(gameObject.transform.GetChild(i).gameObject);
+        }
         if (!FullRandom)
         {
             Random.InitState(RandomSeed);
@@ -85,4 +103,5 @@ public class MazeSpawner : MonoBehaviour
             }
         }
     }
+#endif
 }
