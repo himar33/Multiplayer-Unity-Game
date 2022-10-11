@@ -22,6 +22,8 @@ public class MazeSpawner : MonoBehaviour
     public GameObject GoalPrefab = null;
     private BasicMazeGenerator mMazeGenerator = null;
 
+    public GameObject coffe;
+
     public static T SafeDestroy<T>(T obj) where T : Object
     {
         if (Application.isEditor)
@@ -36,6 +38,11 @@ public class MazeSpawner : MonoBehaviour
     [ButtonMethod]
     private void CreateMaze()
     {
+        if (FindObjectOfType<CoffeScript>())
+        {
+            SafeDestroy(FindObjectOfType<CoffeScript>().gameObject);
+        }
+        
         RandomSeed = Random.Range(0, 99999);
         for (var i = gameObject.transform.childCount - 1; i >= 0; i--)
         {
@@ -102,6 +109,16 @@ public class MazeSpawner : MonoBehaviour
                 }
             }
         }
+
+        List<Transform> floorList = new List<Transform>();
+        for (var i = gameObject.transform.childCount - 1; i >= 0; i--)
+        {
+            if (gameObject.transform.GetChild(i).CompareTag("Floor"))
+            {
+                floorList.Add(gameObject.transform.GetChild(i).transform);
+            }
+        }
+        Instantiate(coffe, floorList[Random.Range(0, floorList.Count)].position, coffe.transform.rotation);
     }
 #endif
 }
