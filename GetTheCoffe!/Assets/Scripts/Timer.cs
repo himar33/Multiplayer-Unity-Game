@@ -12,7 +12,7 @@ public class Timer : MonoBehaviour
 
     private float timeRemaining;
     private bool timerIsRunning = false;
-    float lerp;
+    private float lerp;
     public TMP_Text timeText;
 
     private void Start()
@@ -43,13 +43,18 @@ public class Timer : MonoBehaviour
 
     private void SetVolumeEffect()
     {
+        lerp += Time.deltaTime / time;
+        SetChromaticIntensity(Mathf.Lerp(0, 1, lerp));
+    }
+
+    private void SetChromaticIntensity(float value)
+    {
         VolumeProfile profile = volume.sharedProfile;
         if (!profile.TryGet<ChromaticAberration>(out var chromatic))
         {
             chromatic = profile.Add<ChromaticAberration>(false);
         }
-        lerp += Time.deltaTime / time;
-        chromatic.intensity.value = Mathf.Lerp(0, 1, lerp);
+        chromatic.intensity.value = value;
     }
 
     void DisplayTime(float timeToDisplay)
@@ -65,6 +70,7 @@ public class Timer : MonoBehaviour
         timerIsRunning = false;
         ResetTimer();
         timerIsRunning = true;
+        SetChromaticIntensity(0);
         Debug.Log("Starting timer with " + time);
     }
 
@@ -88,8 +94,7 @@ public class Timer : MonoBehaviour
 
     public void SetTimer(float newTime)
     {
-        time = newTime;
-        ResetTimer();
+        time += newTime;
         Debug.Log("Timer changed to " + newTime);
     }
 

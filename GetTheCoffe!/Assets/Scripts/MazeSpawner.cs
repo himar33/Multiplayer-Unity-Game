@@ -24,25 +24,48 @@ public class MazeSpawner : MonoBehaviour
 
     public GameObject coffe;
 
+    private void Start()
+    {
+        CreateMaze();
+    }
+
     public static T SafeDestroy<T>(T obj) where T : Object
     {
-        if (Application.isEditor)
+        if (!obj) return null;
+
+        if (Application.isEditor && !Application.isPlaying)
+        {
             Object.DestroyImmediate(obj);
+        }  
         else
             Object.Destroy(obj);
 
         return null;
     }
 
+    public void GenerateCoffe()
+    {
+        foreach (CoffeScript go in FindObjectsOfType<CoffeScript>() as CoffeScript[])
+        {
+            SafeDestroy(go.gameObject);
+        }
+
+        List<Transform> floorList = new List<Transform>();
+        for (var i = gameObject.transform.childCount - 1; i >= 0; i--)
+        {
+            if (gameObject.transform.GetChild(i).CompareTag("Floor"))
+            {
+                floorList.Add(gameObject.transform.GetChild(i).transform);
+            }
+        }
+        Instantiate(coffe, floorList[Random.Range(0, floorList.Count)].position, coffe.transform.rotation);
+    }
+
 #if UNITY_EDITOR
     [ButtonMethod]
+#endif
     private void CreateMaze()
     {
-        if (FindObjectOfType<CoffeScript>())
-        {
-            SafeDestroy(FindObjectOfType<CoffeScript>().gameObject);
-        }
-        
         RandomSeed = Random.Range(0, 99999);
         for (var i = gameObject.transform.childCount - 1; i >= 0; i--)
         {
@@ -110,15 +133,6 @@ public class MazeSpawner : MonoBehaviour
             }
         }
 
-        List<Transform> floorList = new List<Transform>();
-        for (var i = gameObject.transform.childCount - 1; i >= 0; i--)
-        {
-            if (gameObject.transform.GetChild(i).CompareTag("Floor"))
-            {
-                floorList.Add(gameObject.transform.GetChild(i).transform);
-            }
-        }
-        Instantiate(coffe, floorList[Random.Range(0, floorList.Count)].position, coffe.transform.rotation);
+        GenerateCoffe();
     }
-#endif
 }

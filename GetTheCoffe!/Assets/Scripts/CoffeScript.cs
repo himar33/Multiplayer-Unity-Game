@@ -4,14 +4,13 @@ using UnityEngine;
 
 public class CoffeScript : MonoBehaviour
 {
+    [SerializeField] private int getTime = 15;
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            if (FindObjectOfType<CoffeScript>())
-            {
-                MazeSpawner.SafeDestroy(FindObjectOfType<CoffeScript>().gameObject);
-            }
+            FindObjectOfType<MazeSpawner>().GenerateCoffe();
+            FindObjectOfType<Timer>().StartTimer();
         }
     }
 }
