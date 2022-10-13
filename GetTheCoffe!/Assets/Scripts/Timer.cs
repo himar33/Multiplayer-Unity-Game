@@ -7,8 +7,10 @@ using TMPro;
 
 public class Timer : MonoBehaviour
 {
-    [SerializeField] private float time = 20;
+    [SerializeField] private float time;
+    [SerializeField] private float timeEffect;
     [SerializeField] private Volume volume;
+    private ChromaticAberration chromaticAberration;
 
     private float timeRemaining;
     private bool timerIsRunning = false;
@@ -17,6 +19,13 @@ public class Timer : MonoBehaviour
 
     private void Start()
     {
+        VolumeProfile profile = volume.sharedProfile;
+        if (!profile.TryGet<ChromaticAberration>(out chromaticAberration))
+        {
+            chromaticAberration = profile.Add<ChromaticAberration>(false);
+        }
+        chromaticAberration.intensity.value = 0;
+
         StartTimer();
     }
 
@@ -27,7 +36,7 @@ public class Timer : MonoBehaviour
 
             if (timeRemaining > 0)
             {
-                SetVolumeEffect();
+                if (timeRemaining <= timeEffect) SetVolumeEffect();
 
                 timeRemaining -= Time.deltaTime;
                 DisplayTime(timeRemaining);
@@ -43,18 +52,13 @@ public class Timer : MonoBehaviour
 
     private void SetVolumeEffect()
     {
-        lerp += Time.deltaTime / time;
+        lerp += Time.deltaTime / timeEffect;
         SetChromaticIntensity(Mathf.Lerp(0, 1, lerp));
     }
 
     private void SetChromaticIntensity(float value)
     {
-        VolumeProfile profile = volume.sharedProfile;
-        if (!profile.TryGet<ChromaticAberration>(out var chromatic))
-        {
-            chromatic = profile.Add<ChromaticAberration>(false);
-        }
-        chromatic.intensity.value = value;
+        chromaticAberration.intensity.value = value;
     }
 
     void DisplayTime(float timeToDisplay)
@@ -70,8 +74,18 @@ public class Timer : MonoBehaviour
         timerIsRunning = false;
         ResetTimer();
         timerIsRunning = true;
-        SetChromaticIntensity(0);
-        Debug.Log("Starting timer with " + time);
+        Debug.Log("Starting timer with " + timeRemaining);
+    }
+
+    public void AddTime(float newTime = 0)
+    {
+        if (timerIsRunning)
+        {
+            timerIsRunning = false;
+            lerp = 0;
+            timeRemaining += newTime;
+            timerIsRunning = true;
+        }
     }
 
     public void ResumeTimer()
@@ -92,14 +106,9 @@ public class Timer : MonoBehaviour
         }
     }
 
-    public void SetTimer(float newTime)
-    {
-        time += newTime;
-        Debug.Log("Timer changed to " + newTime);
-    }
-
     public void ResetTimer()
     {
+        lerp = 0;
         timeRemaining = time;
         Debug.Log("Timer reset");
     }
