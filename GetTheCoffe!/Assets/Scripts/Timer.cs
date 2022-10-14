@@ -36,7 +36,7 @@ public class Timer : MonoBehaviour
 
             if (timeRemaining > 0)
             {
-                if (timeRemaining <= timeEffect) SetVolumeEffect();
+                if (timeRemaining <= timeEffect) UpdateVolumeEffect();
 
                 timeRemaining -= Time.deltaTime;
                 DisplayTime(timeRemaining);
@@ -50,7 +50,7 @@ public class Timer : MonoBehaviour
         }
     }
 
-    private void SetVolumeEffect()
+    private void UpdateVolumeEffect()
     {
         lerp += Time.deltaTime / timeEffect;
         SetChromaticIntensity(Mathf.Lerp(0, 1, lerp));
@@ -83,6 +83,7 @@ public class Timer : MonoBehaviour
         {
             timerIsRunning = false;
             lerp = 0;
+            SetChromaticIntensity(0);
             timeRemaining += newTime;
             timerIsRunning = true;
         }
@@ -109,6 +110,7 @@ public class Timer : MonoBehaviour
     public void ResetTimer()
     {
         lerp = 0;
+        SetChromaticIntensity(0);
         timeRemaining = time;
         Debug.Log("Timer reset");
     }
