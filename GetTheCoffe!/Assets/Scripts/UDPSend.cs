@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using MyBox;
 
 public class UDPSend : MonoBehaviour
 {
@@ -19,7 +20,7 @@ public class UDPSend : MonoBehaviour
     {
         Debug.Log("UDPSend Initializing");
 
-        port = 5000;
+        port = 4231;
         ip = "192.168.1.22";
 
         client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -30,6 +31,14 @@ public class UDPSend : MonoBehaviour
         Debug.Log("Sending to " + ip + " : " + port);
         Debug.Log("Testing: nc -lu " + ip + " : " + port);
     }
+
+#if UNITY_EDITOR
+    [ButtonMethod]
+    public void TestSend()
+    {
+        SendString("TESTING MESSAGE");
+    }
+#endif
 
     public void SendString(string message)
     {

@@ -21,7 +21,7 @@ public class UDPReceive : MonoBehaviour
     {
         Debug.Log("UDPReceive Initializing");
 
-        port = 5000;
+        port = 4231;
 
         Debug.Log("Sending to 192.168.1.22 : " + port);
         Debug.Log("Test-Sending to this Port: nc -u 192.168.1.22  " + port + "");
