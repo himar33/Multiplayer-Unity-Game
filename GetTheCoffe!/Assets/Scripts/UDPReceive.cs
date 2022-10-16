@@ -18,8 +18,8 @@ public class UDPReceive : MonoBehaviour
     {
         Debug.Log("UDPReceive Initializing");
 
-        port = 4231;
-        ip = "192.168.1.22";
+        port = 9999;
+        ip = "127.0.0.1";
 
         Debug.Log("Sending to " + ip + " : " + port);
         Debug.Log("Test-Sending to this Port: nc -u " + ip + " " + port + "");
@@ -31,13 +31,12 @@ public class UDPReceive : MonoBehaviour
 
     private void ReceiveData()
     {
+        IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+        EndPoint senderRemote = (EndPoint)sender;
         while (true)
         {
             try
             {
-                IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-                EndPoint senderRemote = (EndPoint)sender;
-
                 byte[] data = new byte[1024];
                 int recv = client.ReceiveFrom(data, data.Length, SocketFlags.None, ref senderRemote);
 
@@ -55,7 +54,7 @@ public class UDPReceive : MonoBehaviour
     {
         try
         {
-            IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+            IPEndPoint sender = new IPEndPoint(IPAddress.Parse(ip), port);
             EndPoint senderRemote = (EndPoint)(sender);
 
             byte[] data = Encoding.ASCII.GetBytes(message);
@@ -67,5 +66,10 @@ public class UDPReceive : MonoBehaviour
         {
             Debug.Log(err.ToString());
         }
+    }
+
+    private void OnDisable()
+    {
+        receiveThread.Abort();
     }
 }
