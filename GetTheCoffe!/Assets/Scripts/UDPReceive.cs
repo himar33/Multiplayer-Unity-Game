@@ -55,7 +55,7 @@ public class UDPReceive : MonoBehaviour
             }
             catch (System.Exception err)
             {
-                print(err.ToString());
+                Debug.Log(err.ToString());
             }
         }
     }
