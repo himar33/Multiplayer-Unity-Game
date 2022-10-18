@@ -39,14 +39,6 @@ public class UDPSend : MonoBehaviour
         Debug.Log("Testing: nc -lu " + ip + " : " + port);
     }
 
-#if UNITY_EDITOR
-    [ButtonMethod]
-    public void TestSend()
-    {
-        SendString("TESTING MESSAGE");
-    }
-#endif
-
     public void SendString(string message)
     {
         try
@@ -72,9 +64,12 @@ public class UDPSend : MonoBehaviour
 
     private void ReceiveData()
     {
+        bool canReceive = true;
+
         IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
         EndPoint senderRemote = (EndPoint)sender;
-        while (true)
+
+        while (canReceive)
         {
             try
             {
@@ -88,12 +83,13 @@ public class UDPSend : MonoBehaviour
             catch (System.Exception err)
             {
                 Debug.Log(err.ToString());
+                canReceive = false;
             }
         }
     }
 
     private void OnDisable()
     {
-        receiveThread.Abort();
+        if(receiveThread != null) receiveThread.Abort();
     }
 }

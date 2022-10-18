@@ -21,33 +21,16 @@ public class UDPReceive : MonoBehaviour
         port = 9999;
         ip = "127.0.0.1";
 
-        Debug.Log("Sending to " + ip + " : " + port);
-        Debug.Log("Test-Sending to this Port: nc -u " + ip + " " + port + "");
+        client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
         receiveThread = new Thread(new ThreadStart(ReceiveData));
         receiveThread.IsBackground = true;
         receiveThread.Start();
-    }
 
-    private void ReceiveData()
-    {
-        IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-        EndPoint senderRemote = (EndPoint)sender;
-        while (true)
-        {
-            try
-            {
-                byte[] data = new byte[1024];
-                int recv = client.ReceiveFrom(data, data.Length, SocketFlags.None, ref senderRemote);
+        SendString("One player enter the server");
 
-                string text = Encoding.ASCII.GetString(data, 0, recv);
-                Debug.Log(">> " + text);
-            }
-            catch (System.Exception err)
-            {
-                Debug.Log(err.ToString());
-            }
-        }
+        Debug.Log("Sending to " + ip + " : " + port);
+        Debug.Log("Test-Sending to this Port: nc -u " + ip + " " + port + "");
     }
 
     public void SendString(string message)
@@ -68,8 +51,33 @@ public class UDPReceive : MonoBehaviour
         }
     }
 
+    private void ReceiveData()
+    {
+        bool canReceive = true;
+
+        IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+        EndPoint senderRemote = (EndPoint)sender;
+
+        while (canReceive)
+        {
+            try
+            {
+                byte[] data = new byte[1024];
+                int recv = client.ReceiveFrom(data, data.Length, SocketFlags.None, ref senderRemote);
+
+                string text = Encoding.ASCII.GetString(data, 0, recv);
+                Debug.Log(">> " + text);
+            }
+            catch (System.Exception err)
+            {
+                Debug.Log(err.ToString());
+                canReceive = false;
+            }
+        }
+    }
+
     private void OnDisable()
     {
-        receiveThread.Abort();
+        if(receiveThread != null) receiveThread.Abort();
     }
 }
