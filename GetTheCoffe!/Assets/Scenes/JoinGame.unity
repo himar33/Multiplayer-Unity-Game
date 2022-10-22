@@ -219,6 +219,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1690504828893630700, guid: e9593bfc11f35f44e83542205dedee28,
+          type: 3}
+        m_TargetAssemblyTypeName: ChangeScene, Assembly-CSharp
+        m_MethodName: GoToScene
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 3
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &16093126
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -881,7 +894,7 @@ GameObject:
   - component: {fileID: 1731399871}
   - component: {fileID: 1731399870}
   m_Layer: 0
-  m_Name: ServerManager
+  m_Name: ClientManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -899,9 +912,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a17642efc694a64cb6b4c3ed2a6a8bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ip: 
   port: 0
-  lastReceivedUDPPacket: 
-  allReceivedUDPPackets: 
 --- !u!4 &1731399871
 Transform:
   m_ObjectHideFlags: 0

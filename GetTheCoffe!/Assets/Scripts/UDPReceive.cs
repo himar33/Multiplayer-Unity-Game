@@ -14,6 +14,18 @@ public class UDPReceive : MonoBehaviour
     private Thread receiveThread;
     private Socket client;
 
+    void Awake()
+    {
+        GameObject[] objs = GameObject.FindGameObjectsWithTag("ClientManager");
+
+        if (objs.Length > 1)
+        {
+            Destroy(this.gameObject);
+        }
+
+        DontDestroyOnLoad(this.gameObject);
+    }
+
     public void JoinServer()
     {
         Debug.Log("UDPReceive Initializing");
