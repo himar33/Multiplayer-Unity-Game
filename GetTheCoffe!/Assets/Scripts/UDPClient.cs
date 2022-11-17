@@ -11,6 +11,7 @@ public class UDPClient : MonoBehaviour
     public int port;
     public UnityEvent<string> chatEvent;
 
+    private EndPoint endPoint;
     private Thread receiveThread;
     private Socket client;
 
@@ -41,18 +42,24 @@ public class UDPClient : MonoBehaviour
     {
         Debug.Log("UDP Client Initializing");
 
-        port = 9999;
+        byte[] data = new byte[1024];
+        port = 9050;
         ip = "127.0.0.1";
 
+        IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(ip), port);
         client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+        string welcome = "Hello, are you there?";
+        data = Encoding.ASCII.GetBytes(welcome);
+        client.SendTo(data, data.Length, SocketFlags.None, ipep);
+
+        endPoint = ipep;
 
         receiveThread = new Thread(new ThreadStart(ReceiveData))
         {
             IsBackground = true
         };
         receiveThread.Start();
-
-        SendString("One player enter the server");
 
         Debug.Log("Sending to " + ip + " : " + port);
         Debug.Log("Test-Sending to this Port: nc -u " + ip + " " + port + "");
@@ -62,12 +69,9 @@ public class UDPClient : MonoBehaviour
     {
         try
         {
-            IPEndPoint sender = new IPEndPoint(IPAddress.Parse(ip), port);
-            EndPoint senderRemote = sender;
-
             byte[] data = Encoding.ASCII.GetBytes(message);
 
-            client.SendTo(data, data.Length, SocketFlags.None, senderRemote);
+            client.SendTo(data, endPoint);
         }
         catch (System.Exception err)
         {
@@ -83,11 +87,8 @@ public class UDPClient : MonoBehaviour
         {
             try
             {
-                IPEndPoint sender = new IPEndPoint(IPAddress.Parse(ip), port);
-                EndPoint senderRemote = sender;
-
                 byte[] data = new byte[1024];
-                int recv = client.ReceiveFrom(data, data.Length, SocketFlags.None, ref senderRemote);
+                int recv = client.ReceiveFrom(data, ref endPoint);
 
                 string text = Encoding.ASCII.GetString(data, 0, recv);
 

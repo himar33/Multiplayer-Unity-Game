@@ -13,6 +13,7 @@ public class UDPServer : MonoBehaviour
     public string serverName;
     public UnityEvent<string> chatEvent;
 
+    private EndPoint endPoint;
     private Thread receiveThread;
     private Socket client;
 
@@ -43,14 +44,20 @@ public class UDPServer : MonoBehaviour
     {
         Debug.Log("UDP Server Initializing");
 
-        port = 9999;
+        int recv;
+        byte[] data = new byte[1024];
+        port = 9050;
         ip = "127.0.0.1";
 
-        IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+        IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(ip), port);
         client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        client.Bind(endPoint);
+        client.Bind(ipep);
 
-        SendString(serverName);
+        endPoint = ipep;
+
+        string welcome = "Welcome to my test server";
+        data = Encoding.ASCII.GetBytes(welcome);
+        client.SendTo(data, data.Length, SocketFlags.None, endPoint);
 
         receiveThread = new Thread(new ThreadStart(ReceiveData))
         {
@@ -62,23 +69,6 @@ public class UDPServer : MonoBehaviour
         Debug.Log("Testing: nc -lu " + ip + " : " + port);
     }
 
-    public void SendString(string message)
-    {
-        try
-        {
-            IPEndPoint sender = new IPEndPoint(IPAddress.Parse(ip), port);
-            EndPoint senderRemote = sender;
-
-            byte[] data = Encoding.ASCII.GetBytes(message);
-
-            client.SendTo(data, data.Length, SocketFlags.None, senderRemote);
-        }
-        catch (System.Exception err)
-        {
-            Debug.Log(err.ToString());
-        }
-    }
-
     public void SetServerName(string n)
     {
         serverName = n;
@@ -87,20 +77,19 @@ public class UDPServer : MonoBehaviour
     private void ReceiveData()
     {
         bool canReceive = true;
-
-        IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-        EndPoint senderRemote = sender;
-
+        
         while (canReceive)
         {
             try
             {
                 byte[] data = new byte[1024];
-                int recv = client.ReceiveFrom(data, data.Length, SocketFlags.None, ref senderRemote);
+                int recv = client.ReceiveFrom(data, ref endPoint);
 
                 string text = Encoding.ASCII.GetString(data, 0, recv);
 
                 Debug.Log(">> " + text);
+
+                client.SendTo(data, recv, SocketFlags.None, endPoint);
 
                 currentText = text;
                 receiveMessage = true;
