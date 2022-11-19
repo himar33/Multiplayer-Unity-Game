@@ -11,6 +11,7 @@ public class UDPClient : MonoBehaviour
     public int port;
     public UnityEvent<string> chatEvent;
 
+    private int recv;
     private byte[] data;
     private EndPoint endPoint;
     private Thread receiveThread;
@@ -48,25 +49,30 @@ public class UDPClient : MonoBehaviour
 
         IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(ip), port);
         client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        endPoint = ipep;
+
+        IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+        endPoint = sender;
+
+        data = new byte[1024];
+        string welcome = "-Client: Hello, are you there?";
+        data = Encoding.ASCII.GetBytes(welcome);
+        client.SendTo(data, data.Length, SocketFlags.None, ipep);
 
         receiveThread = new Thread(new ThreadStart(ReceiveData))
         {
             IsBackground = true
         };
         receiveThread.Start();
-
-        Debug.Log("Sending to " + ip + " : " + port);
-        Debug.Log("Test-Sending to this Port: nc -u " + ip + " " + port + "");
     }
 
     public void SendString(string message)
     {
         try
         {
-            data = Encoding.ASCII.GetBytes(message);
+            data = new byte[1024];
+            data = Encoding.ASCII.GetBytes("-Client: " + message);
 
-            client.SendTo(data, endPoint);
+            client.SendTo(data, data.Length, SocketFlags.None, endPoint);
         }
         catch (System.Exception err)
         {
@@ -78,21 +84,16 @@ public class UDPClient : MonoBehaviour
     {
         bool canReceive = true;
 
-        data = new byte[1024];
-        string welcome = "Hello, are you there?";
-        data = Encoding.ASCII.GetBytes(welcome);
-        client.SendTo(data, data.Length, SocketFlags.None, endPoint);
-
         while (canReceive)
         {
             try
             {
                 data = new byte[1024];
-                int recv = client.ReceiveFrom(data, ref endPoint);
+                recv = client.ReceiveFrom(data, ref endPoint);
 
                 string text = Encoding.ASCII.GetString(data, 0, recv);
 
-                Debug.Log(">> " + text);
+                Debug.Log(">> Client: " + text);
 
                 currentText = text;
                 receiveMessage = true;

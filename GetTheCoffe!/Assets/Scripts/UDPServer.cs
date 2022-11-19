@@ -19,9 +19,6 @@ public class UDPServer : MonoBehaviour
     private Thread receiveThread;
     private Socket client;
 
-    private string currentText;
-    private bool receiveMessage;
-
     void Awake()
     {
         GameObject[] objs = GameObject.FindGameObjectsWithTag("ServerManager");
@@ -38,8 +35,6 @@ public class UDPServer : MonoBehaviour
     {
         if (chatEvent == null)
             chatEvent = new UnityEvent<string>();
-
-        receiveMessage = false;
     }
 
     public void InitServer()
@@ -49,24 +44,38 @@ public class UDPServer : MonoBehaviour
         port = 9050;
         ip = "127.0.0.1";
 
-        IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(ip), port);
+        IPEndPoint ipep = new IPEndPoint(IPAddress.Any, port);
         client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         client.Bind(ipep);
-        endPoint = ipep;
+
+        IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+        endPoint = sender;
 
         receiveThread = new Thread(new ThreadStart(ReceiveData))
         {
             IsBackground = true
         };
         receiveThread.Start();
-
-        Debug.Log("Sending to " + ip + " : " + port);
-        Debug.Log("Testing: nc -lu " + ip + " : " + port);
     }
 
     public void SetServerName(string n)
     {
         serverName = n;
+    }
+
+    public void SendString(string message)
+    {
+        try
+        {
+            data = new byte[1024];
+            data = Encoding.ASCII.GetBytes(message);
+
+            client.SendTo(data, data.Length, SocketFlags.None, endPoint);
+        }
+        catch (System.Exception err)
+        {
+            Debug.Log(err.ToString());
+        }
     }
 
     private void ReceiveData()
@@ -76,7 +85,7 @@ public class UDPServer : MonoBehaviour
         data = new byte[1024];
         recv = client.ReceiveFrom(data, ref endPoint);
 
-        string welcome = "Welcome to my test server";
+        string welcome = "-Server: Welcome to my test server";
         data = Encoding.ASCII.GetBytes(welcome);
         client.SendTo(data, data.Length, SocketFlags.None, endPoint);
 
@@ -89,27 +98,15 @@ public class UDPServer : MonoBehaviour
 
                 string text = Encoding.ASCII.GetString(data, 0, recv);
 
-                Debug.Log(">> " + text);
+                Debug.Log(">> Server: " + text);
 
                 client.SendTo(data, recv, SocketFlags.None, endPoint);
-
-                currentText = text;
-                receiveMessage = true;
             }
             catch (System.Exception err)
             {
                 Debug.Log(err.ToString());
                 canReceive = false;
             }
-        }
-    }
-
-    private void Update()
-    {
-        if (receiveMessage)
-        {
-            chatEvent.Invoke(currentText);
-            receiveMessage = false;
         }
     }
 

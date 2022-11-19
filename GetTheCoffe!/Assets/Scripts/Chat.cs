@@ -7,16 +7,11 @@ public class Chat : MonoBehaviour
 {
     public List<string> messages;
     public TMP_Text text;
+    private UDPClient client;
 
     private void Start()
     {
-        TCPServer server = FindObjectOfType<TCPServer>();
-        if (server)
-        {
-            server.chatEvent.AddListener(SetText);
-        }
-
-        UDPClient client = FindObjectOfType<UDPClient>();
+        client = FindObjectOfType<UDPClient>();
         if (client)
         {
             client.chatEvent.AddListener(SetText);
@@ -31,14 +26,6 @@ public class Chat : MonoBehaviour
 
     public void AddMessage(string message)
     {
-        TCPServer server = FindObjectOfType<TCPServer>();
-        if (server)
-        {
-            server.SendString(message);
-            return;
-        }
-
-        UDPClient client = FindObjectOfType<UDPClient>();
         if (client)
         {
             client.SendString(message);

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028346, g: 0.22571373, b: 0.30692244, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -613,6 +613,7 @@ GameObject:
   - component: {fileID: 497811289}
   - component: {fileID: 497811290}
   - component: {fileID: 497811291}
+  - component: {fileID: 497811292}
   m_Layer: 0
   m_Name: ServerManager
   m_TagString: Untagged
@@ -668,6 +669,23 @@ MonoBehaviour:
   port: 0
   ip: 
   serverName: 
+  chatEvent:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &497811292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497811286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 797522451840b8349b3a19d66be39c3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ip: 
+  port: 0
   chatEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -1169,6 +1187,18 @@ MonoBehaviour:
       - m_Target: {fileID: 497811291}
         m_TargetAssemblyTypeName: UDPServer, Assembly-CSharp
         m_MethodName: InitServer
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 497811292}
+        m_TargetAssemblyTypeName: UDPClient, Assembly-CSharp
+        m_MethodName: JoinServer
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
