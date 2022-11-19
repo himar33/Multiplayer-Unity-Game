@@ -11,6 +11,7 @@ public class UDPClient : MonoBehaviour
     public int port;
     public UnityEvent<string> chatEvent;
 
+    private byte[] data;
     private EndPoint endPoint;
     private Thread receiveThread;
     private Socket client;
@@ -42,17 +43,11 @@ public class UDPClient : MonoBehaviour
     {
         Debug.Log("UDP Client Initializing");
 
-        byte[] data = new byte[1024];
         port = 9050;
         ip = "127.0.0.1";
 
         IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(ip), port);
         client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-        string welcome = "Hello, are you there?";
-        data = Encoding.ASCII.GetBytes(welcome);
-        client.SendTo(data, data.Length, SocketFlags.None, ipep);
-
         endPoint = ipep;
 
         receiveThread = new Thread(new ThreadStart(ReceiveData))
@@ -69,7 +64,7 @@ public class UDPClient : MonoBehaviour
     {
         try
         {
-            byte[] data = Encoding.ASCII.GetBytes(message);
+            data = Encoding.ASCII.GetBytes(message);
 
             client.SendTo(data, endPoint);
         }
@@ -83,11 +78,16 @@ public class UDPClient : MonoBehaviour
     {
         bool canReceive = true;
 
+        data = new byte[1024];
+        string welcome = "Hello, are you there?";
+        data = Encoding.ASCII.GetBytes(welcome);
+        client.SendTo(data, data.Length, SocketFlags.None, endPoint);
+
         while (canReceive)
         {
             try
             {
-                byte[] data = new byte[1024];
+                data = new byte[1024];
                 int recv = client.ReceiveFrom(data, ref endPoint);
 
                 string text = Encoding.ASCII.GetString(data, 0, recv);

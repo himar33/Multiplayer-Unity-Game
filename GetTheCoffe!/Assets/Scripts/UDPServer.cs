@@ -13,6 +13,8 @@ public class UDPServer : MonoBehaviour
     public string serverName;
     public UnityEvent<string> chatEvent;
 
+    private int recv;
+    private byte[] data;
     private EndPoint endPoint;
     private Thread receiveThread;
     private Socket client;
@@ -44,20 +46,13 @@ public class UDPServer : MonoBehaviour
     {
         Debug.Log("UDP Server Initializing");
 
-        int recv;
-        byte[] data = new byte[1024];
         port = 9050;
         ip = "127.0.0.1";
 
         IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(ip), port);
         client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         client.Bind(ipep);
-
         endPoint = ipep;
-
-        string welcome = "Welcome to my test server";
-        data = Encoding.ASCII.GetBytes(welcome);
-        client.SendTo(data, data.Length, SocketFlags.None, endPoint);
 
         receiveThread = new Thread(new ThreadStart(ReceiveData))
         {
@@ -77,13 +72,20 @@ public class UDPServer : MonoBehaviour
     private void ReceiveData()
     {
         bool canReceive = true;
-        
+
+        data = new byte[1024];
+        recv = client.ReceiveFrom(data, ref endPoint);
+
+        string welcome = "Welcome to my test server";
+        data = Encoding.ASCII.GetBytes(welcome);
+        client.SendTo(data, data.Length, SocketFlags.None, endPoint);
+
         while (canReceive)
         {
             try
             {
-                byte[] data = new byte[1024];
-                int recv = client.ReceiveFrom(data, ref endPoint);
+                data = new byte[1024];
+                recv = client.ReceiveFrom(data, ref endPoint);
 
                 string text = Encoding.ASCII.GetString(data, 0, recv);
 
