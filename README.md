@@ -1,6 +1,6 @@
 # Get the coffee!
 
-Get the coffee is a free multiplayer game developed by 2 CITM students where you will fight against other cafeine adicts in order to collect more coffee every few seconds and not die, you can use your stored cafeine to use incredible powers such as a quick but effective dash, a strong pull on your oponents stoping them in their tracks or you can build up your rage to destroy some walls to get more and more coffee.
+Get the coffee is a free multiplayer game developed by 2 CITM students where you will fight against other cafeine adicts in order to collect more coffee every few seconds and not die, you can use your stored cafeine to use incredible powers such as a quick but effective dash, a strong pull on your oponents stoping them in their tracks or you can build up your rage to destroy some walls to get more and more coffee. The game has 2 maps wich will rotate randomly every match.
 
 ## Rules
 
