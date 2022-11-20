@@ -16,8 +16,12 @@ public class UDPServer : MonoBehaviour
     private int recv;
     private byte[] data;
     private EndPoint endPoint;
+    private IPEndPoint ipep;
     private Thread receiveThread;
     private Socket client;
+
+    private string currentText;
+    private bool receiveMessage;
 
     void Awake()
     {
@@ -35,6 +39,17 @@ public class UDPServer : MonoBehaviour
     {
         if (chatEvent == null)
             chatEvent = new UnityEvent<string>();
+
+        receiveMessage = false;
+    }
+
+    private void Update()
+    {
+        if (receiveMessage)
+        {
+            chatEvent.Invoke(currentText);
+            receiveMessage = false;
+        }
     }
 
     public void InitServer()
@@ -44,7 +59,7 @@ public class UDPServer : MonoBehaviour
         port = 9050;
         ip = "127.0.0.1";
 
-        IPEndPoint ipep = new IPEndPoint(IPAddress.Any, port);
+        ipep = new IPEndPoint(IPAddress.Any, port);
         client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         client.Bind(ipep);
 
@@ -71,6 +86,7 @@ public class UDPServer : MonoBehaviour
             data = Encoding.ASCII.GetBytes(message);
 
             client.SendTo(data, data.Length, SocketFlags.None, endPoint);
+            Debug.Log(">> Server send: " + message);
         }
         catch (System.Exception err)
         {
@@ -98,9 +114,14 @@ public class UDPServer : MonoBehaviour
 
                 string text = Encoding.ASCII.GetString(data, 0, recv);
 
-                Debug.Log(">> Server: " + text);
+                Debug.Log(">> Server receive: " + text);
 
                 client.SendTo(data, recv, SocketFlags.None, endPoint);
+
+                Debug.Log(">> Server send: " + text);
+
+                currentText = text;
+                receiveMessage = true;
             }
             catch (System.Exception err)
             {

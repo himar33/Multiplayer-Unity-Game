@@ -14,6 +14,7 @@ public class UDPClient : MonoBehaviour
     private int recv;
     private byte[] data;
     private EndPoint endPoint;
+    private IPEndPoint ipep;
     private Thread receiveThread;
     private Socket client;
 
@@ -47,16 +48,16 @@ public class UDPClient : MonoBehaviour
         port = 9050;
         ip = "127.0.0.1";
 
-        IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(ip), port);
+        ipep = new IPEndPoint(IPAddress.Parse(ip), port);
         client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-        IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-        endPoint = sender;
 
         data = new byte[1024];
         string welcome = "-Client: Hello, are you there?";
         data = Encoding.ASCII.GetBytes(welcome);
         client.SendTo(data, data.Length, SocketFlags.None, ipep);
+
+        IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+        endPoint = sender;
 
         receiveThread = new Thread(new ThreadStart(ReceiveData))
         {
@@ -72,7 +73,8 @@ public class UDPClient : MonoBehaviour
             data = new byte[1024];
             data = Encoding.ASCII.GetBytes("-Client: " + message);
 
-            client.SendTo(data, data.Length, SocketFlags.None, endPoint);
+            client.SendTo(data, data.Length, SocketFlags.None, ipep);
+            Debug.Log(">> Client send: " + message);
         }
         catch (System.Exception err)
         {
@@ -93,7 +95,7 @@ public class UDPClient : MonoBehaviour
 
                 string text = Encoding.ASCII.GetString(data, 0, recv);
 
-                Debug.Log(">> Client: " + text);
+                Debug.Log(">> Client receive: " + text);
 
                 currentText = text;
                 receiveMessage = true;
