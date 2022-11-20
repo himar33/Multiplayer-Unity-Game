@@ -23,8 +23,8 @@ The rules are simple:
 
 ## Team
 
--  Himar Bravo [https://github.com/himar33] Main programer.
--  Pol Pallares [https://github.com/Zeta115] Main designer.
+-  [Himar Bravo](https://github.com/himar33) Main programer.
+-  [Pol Pallares](https://github.com/Zeta115) Main designer.
 
 ### Screenshots
 
