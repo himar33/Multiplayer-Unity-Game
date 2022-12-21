@@ -79,7 +79,7 @@ public class UDPServer : MonoBehaviour
         serverName = n;
     }
 
-    public void SendString(DataType dataType, object data)
+    public void SendString(DataType dataType, params string[] data)
     {
         try
         {
@@ -93,7 +93,7 @@ public class UDPServer : MonoBehaviour
             writer.Write((byte)dataType);
 
             // Escribimos el objeto serializado en el stream
-            writer.Write(data);
+            //writer.Write(data);
 
             // Obtenemos el array de bytes serializado del stream
             byte[] serializedData = stream.ToArray();
