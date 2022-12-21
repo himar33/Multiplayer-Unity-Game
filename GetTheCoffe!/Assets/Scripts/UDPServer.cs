@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using UnityEngine.Events;
-
+using System.IO;
 
 public class UDPServer : MonoBehaviour
 {
@@ -19,6 +19,7 @@ public class UDPServer : MonoBehaviour
     private IPEndPoint ipep;
     private Thread receiveThread;
     private Socket client;
+    private MemoryStream stream;
 
     private string currentText;
     private bool receiveMessage;
@@ -78,15 +79,27 @@ public class UDPServer : MonoBehaviour
         serverName = n;
     }
 
-    public void SendString(string message)
+    public void SendString(DataType dataType, object data)
     {
         try
         {
-            data = new byte[1024];
-            data = Encoding.ASCII.GetBytes(message);
+            // Creamos un stream de destino
+            MemoryStream stream = new MemoryStream();
 
-            client.SendTo(data, data.Length, SocketFlags.None, endPoint);
-            Debug.Log(">> Server send: " + message);
+            // Creamos un escritor binario y le proporcionamos el stream de destino
+            BinaryWriter writer = new BinaryWriter(stream);
+
+            // Escribimos el tipo de dato en el stream
+            writer.Write((byte)dataType);
+
+            // Escribimos el objeto serializado en el stream
+            writer.Write(data);
+
+            // Obtenemos el array de bytes serializado del stream
+            byte[] serializedData = stream.ToArray();
+
+            client.SendTo(serializedData, serializedData.Length, SocketFlags.None, endPoint);
+            Debug.Log(">> Server send: " + data.ToString());
         }
         catch (System.Exception err)
         {

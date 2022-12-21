@@ -5,6 +5,7 @@ using TMPro;
 
 public class Chat : MonoBehaviour
 {
+    public GameObject startButton;
     public List<string> messages;
     public TMP_Text text;
 
@@ -14,12 +15,14 @@ public class Chat : MonoBehaviour
         if (server)
         {
             server.chatEvent.AddListener(SetText);
+            startButton.SetActive(true);
         }
 
         UDPClient client = FindObjectOfType<UDPClient>();
         if (client)
         {
             client.chatEvent.AddListener(SetText);
+            startButton.SetActive(false);
         }
     }
 
