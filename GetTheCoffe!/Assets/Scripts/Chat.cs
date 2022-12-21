@@ -37,7 +37,7 @@ public class Chat : MonoBehaviour
         UDPServer server = FindObjectOfType<UDPServer>();
         if (server)
         {
-            server.SendString(message);
+            //server.SendString(message);
             return;
         }
 
