@@ -19,7 +19,6 @@ public class UDPServer : MonoBehaviour
     private IPEndPoint ipep;
     private Thread receiveThread;
     private Socket client;
-    private MemoryStream stream;
 
     private string currentText;
     private bool receiveMessage;
@@ -79,27 +78,15 @@ public class UDPServer : MonoBehaviour
         serverName = n;
     }
 
-    public void SendString(DataType dataType, params string[] data)
+    public void SendString(Data data)
     {
         try
         {
-            // Creamos un stream de destino
-            MemoryStream stream = new MemoryStream();
-
-            // Creamos un escritor binario y le proporcionamos el stream de destino
-            BinaryWriter writer = new BinaryWriter(stream);
-
-            // Escribimos el tipo de dato en el stream
-            writer.Write((byte)dataType);
-
-            // Escribimos el objeto serializado en el stream
-            //writer.Write(data);
-
-            // Obtenemos el array de bytes serializado del stream
-            byte[] serializedData = stream.ToArray();
+            byte[] serializedData = new byte[1024];
+            serializedData = data.Serialize();
 
             client.SendTo(serializedData, serializedData.Length, SocketFlags.None, endPoint);
-            Debug.Log(">> Server send: " + data.ToString());
+            Debug.Log(">> Server send: " + data.dataType.ToString());
         }
         catch (System.Exception err)
         {
@@ -115,8 +102,7 @@ public class UDPServer : MonoBehaviour
         recv = client.ReceiveFrom(data, ref endPoint);
 
         string welcome = "-Server: Welcome to my test server";
-        data = Encoding.ASCII.GetBytes(welcome);
-        client.SendTo(data, data.Length, SocketFlags.None, endPoint);
+        SendString(new MessageData(welcome));
 
         while (canReceive)
         {
@@ -125,16 +111,7 @@ public class UDPServer : MonoBehaviour
                 data = new byte[1024];
                 recv = client.ReceiveFrom(data, ref endPoint);
 
-                string text = Encoding.ASCII.GetString(data, 0, recv);
-
-                Debug.Log(">> Server receive: " + text);
-
-                client.SendTo(data, recv, SocketFlags.None, endPoint);
-
-                Debug.Log(">> Server send: " + text);
-
-                currentText = text;
-                receiveMessage = true;
+                Deserialize(data);
             }
             catch (System.Exception err)
             {
@@ -142,6 +119,40 @@ public class UDPServer : MonoBehaviour
                 canReceive = false;
             }
         }
+    }
+
+    private void Deserialize(byte[] bytes)
+    {
+        MemoryStream stream = new MemoryStream();
+        stream.Write(bytes, 0, bytes.Length);
+        BinaryReader reader = new BinaryReader(stream);
+
+        stream.Seek(0, SeekOrigin.Begin);
+        DataType dataType = (DataType)reader.ReadByte();
+        switch (dataType)
+        {
+            case DataType.Movement:
+                GameObject go = GameObject.Find(reader.ReadString());
+                if (go)
+                {
+                    Vector3 newPos = new Vector3(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
+                    go.transform.position = newPos;
+                }
+                break;
+            case DataType.ChatMessage:
+                string text = reader.ReadString();
+                currentText = text;
+                receiveMessage = true;
+                break;
+            case DataType.ScoreUpdate:
+                break;
+            case DataType.ChangeScene:
+                ChangeScene.GoToScene(reader.ReadInt32());
+                break;
+            default:
+                break;
+        }
+        Debug.Log(">> Server send: " + dataType.ToString());
     }
 
     private void OnDisable()

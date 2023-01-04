@@ -24,11 +24,6 @@ public class MazeSpawner : MonoBehaviour
 
     public GameObject coffe;
 
-    private void Start()
-    {
-        CreateMaze();
-    }
-
     public static T SafeDestroy<T>(T obj) where T : Object
     {
         if (!obj) return null;

@@ -9,16 +9,19 @@ public class Chat : MonoBehaviour
     public List<string> messages;
     public TMP_Text text;
 
+    private UDPServer server;
+    private UDPClient client;
+
     private void Start()
     {
-        UDPServer server = FindObjectOfType<UDPServer>();
+        server = FindObjectOfType<UDPServer>();
         if (server)
         {
             server.chatEvent.AddListener(SetText);
             startButton.SetActive(true);
         }
 
-        UDPClient client = FindObjectOfType<UDPClient>();
+        client = FindObjectOfType<UDPClient>();
         if (client)
         {
             client.chatEvent.AddListener(SetText);
@@ -34,18 +37,25 @@ public class Chat : MonoBehaviour
 
     public void AddMessage(string message)
     {
-        UDPServer server = FindObjectOfType<UDPServer>();
         if (server)
         {
-            //server.SendString(message);
+            server.SendString(new MessageData(message));
             return;
         }
 
-        UDPClient client = FindObjectOfType<UDPClient>();
         if (client)
         {
-            client.SendString(message);
+            client.SendString(new MessageData(message));
             return;
+        }
+    }
+
+    public void StartGame()
+    {
+        if (server)
+        {
+            server.SendString(new ChangeSceneData(4));
+            ChangeScene.GoToScene(4);
         }
     }
 }

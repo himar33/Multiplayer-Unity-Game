@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using UnityEngine.Events;
+using System.IO;
 
 public class UDPClient : MonoBehaviour
 {
@@ -53,8 +54,7 @@ public class UDPClient : MonoBehaviour
 
         data = new byte[1024];
         string welcome = "-Client: Hello, are you there?";
-        data = Encoding.ASCII.GetBytes(welcome);
-        client.SendTo(data, data.Length, SocketFlags.None, ipep);
+        SendString(new MessageData(welcome));
 
         IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
         endPoint = sender;
@@ -66,15 +66,15 @@ public class UDPClient : MonoBehaviour
         receiveThread.Start();
     }
 
-    public void SendString(string message)
+    public void SendString(Data data)
     {
         try
         {
-            data = new byte[1024];
-            data = Encoding.ASCII.GetBytes("-Client: " + message);
+            byte[] serializedData = new byte[1024];
+            serializedData = data.Serialize();
 
-            client.SendTo(data, data.Length, SocketFlags.None, ipep);
-            Debug.Log(">> Client send: " + message);
+            client.SendTo(serializedData, serializedData.Length, SocketFlags.None, ipep);
+            Debug.Log(">> Client send: " + data.dataType.ToString());
         }
         catch (System.Exception err)
         {
@@ -93,12 +93,7 @@ public class UDPClient : MonoBehaviour
                 data = new byte[1024];
                 recv = client.ReceiveFrom(data, ref endPoint);
 
-                string text = Encoding.ASCII.GetString(data, 0, recv);
-
-                Debug.Log(">> Client receive: " + text);
-
-                currentText = text;
-                receiveMessage = true;
+                Deserialize(data);
             }
             catch (System.Exception err)
             {
@@ -106,6 +101,40 @@ public class UDPClient : MonoBehaviour
                 canReceive = false;
             }
         }
+    }
+
+    private void Deserialize(byte[] bytes)
+    {
+        MemoryStream stream = new MemoryStream();
+        stream.Write(bytes, 0, bytes.Length);
+        BinaryReader reader = new BinaryReader(stream);
+
+        stream.Seek(0, SeekOrigin.Begin);
+        DataType dataType = (DataType)reader.ReadByte();
+        switch (dataType)
+        {
+            case DataType.Movement:
+                GameObject go = GameObject.Find(reader.ReadString());
+                if (go)
+                {
+                    Vector3 newPos = new Vector3(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
+                    go.transform.position = newPos;
+                }
+                break;
+            case DataType.ChatMessage:
+                string text = reader.ReadString();
+                currentText = text;
+                receiveMessage = true;
+                break;
+            case DataType.ScoreUpdate:
+                break;
+            case DataType.ChangeScene:
+                ChangeScene.GoToScene(reader.ReadInt32());
+                break;
+            default:
+                break;
+        }
+        Debug.Log(">> Client send: " + dataType.ToString());
     }
 
     private void Update()

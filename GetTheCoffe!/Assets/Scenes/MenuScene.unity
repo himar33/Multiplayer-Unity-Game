@@ -274,7 +274,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1690504828893630700, guid: e9593bfc11f35f44e83542205dedee28,
+      - m_Target: {fileID: 6647842977047194058, guid: 1ca939f7e935ede478439e69c2bac9af,
           type: 3}
         m_TargetAssemblyTypeName: ChangeScene, Assembly-CSharp
         m_MethodName: GoToScene
@@ -546,7 +546,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1690504828893630700, guid: e9593bfc11f35f44e83542205dedee28,
+      - m_Target: {fileID: 6647842977047194058, guid: 1ca939f7e935ede478439e69c2bac9af,
           type: 3}
         m_TargetAssemblyTypeName: ChangeScene, Assembly-CSharp
         m_MethodName: GoToScene
