@@ -7,12 +7,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Rigidbody _rb;
     [SerializeField] private float _speed = 5;
     [SerializeField] private float _turnSpeed = 360;
-    private Vector3 _input;
+    public bool isMainPlayer = true;
+
+    [HideInInspector] public Vector3 _input;
     private Animator animator;
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        _input = Vector3.zero;
     }
 
     private void Update()
@@ -28,7 +31,10 @@ public class PlayerController : MonoBehaviour
 
     private void GatherInput()
     {
-        _input = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        if (isMainPlayer)
+        {
+            _input = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        }
     }
 
     private void Look()

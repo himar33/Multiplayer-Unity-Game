@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8917194180277083322}
   m_Layer: 0
   m_Name: ServerManager
-  m_TagString: Untagged
+  m_TagString: UDPManager
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -44,9 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c04d6f5608aae2d459d2edd950a18067, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  port: 0
   ip: 
-  serverName: 
+  port: 0
   chatEvent:
     m_PersistentCalls:
       m_Calls: []
+  serverName: 
