@@ -10,7 +10,8 @@ public enum DataType
     Movement,
     ChatMessage,
     ScoreUpdate,
-    ChangeScene
+    ChangeScene,
+    Instantiate
 }
 
 public abstract class Data
@@ -74,6 +75,29 @@ public class ChangeSceneData : Data
         BinaryWriter writter = new BinaryWriter(stream);
         writter.Write((byte)dataType);
         writter.Write(sceneIndex);
+        return stream.ToArray();
+    }
+}
+
+public class InstantiateData : Data
+{
+    public string prefabName;
+    public Vector3 position;
+    public InstantiateData(string _prefabName, Vector3 _position)
+    {
+        prefabName = _prefabName;
+        position = _position;
+        dataType = DataType.Instantiate;
+    }
+    public override byte[] Serialize()
+    {
+        MemoryStream stream = new MemoryStream();
+        BinaryWriter writter = new BinaryWriter(stream);
+        writter.Write((byte)dataType);
+        writter.Write(prefabName);
+        writter.Write(position.x);
+        writter.Write(position.y);
+        writter.Write(position.z);
         return stream.ToArray();
     }
 }

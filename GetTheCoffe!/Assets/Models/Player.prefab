@@ -1408,6 +1408,8 @@ MonoBehaviour:
   _rb: {fileID: 2826132443160022941}
   _speed: 5
   _turnSpeed: 2000
+  isMainPlayer: 1
+  _input: {x: 0, y: 0, z: 0}
 --- !u!114 &2826132443160022943
 MonoBehaviour:
   m_ObjectHideFlags: 0

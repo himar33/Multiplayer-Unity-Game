@@ -8327,7 +8327,7 @@ MonoBehaviour:
   m_Priority: 10
   m_StandbyUpdate: 2
   m_LookAt: {fileID: 0}
-  m_Follow: {fileID: 96547023090008641}
+  m_Follow: {fileID: 0}
   m_Lens:
     FieldOfView: 60
     OrthographicSize: 7
@@ -35002,12 +35002,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2147448610}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &96547023090008641 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8203408629282330081, guid: 5e9331a427a673440b46021eb9b48671,
-    type: 3}
-  m_PrefabInstance: {fileID: 8110804459192948640}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8110804459192948640
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35018,7 +35012,7 @@ PrefabInstance:
     - target: {fileID: 2826132443160022940, guid: 5e9331a427a673440b46021eb9b48671,
         type: 3}
       propertyPath: isMainPlayer
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8203408629282330081, guid: 5e9331a427a673440b46021eb9b48671,
         type: 3}

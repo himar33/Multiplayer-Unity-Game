@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour
         if (isMainPlayer)
         {
             _input = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+            if (UDP.instance) UDP.instance.SendString(new MovementData(_input, name));
         }
     }
 
