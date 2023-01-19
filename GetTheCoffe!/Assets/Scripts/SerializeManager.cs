@@ -36,6 +36,12 @@ public class MessageData : Data
         writter.Write(message);
         return stream.ToArray();
     }
+    public static MessageData Deserialize(BinaryReader reader)
+    {
+        MessageData newMessage = new MessageData();
+        newMessage.message = reader.ReadString();
+        return newMessage;
+    }
 }
 
 public class MovementData : Data
@@ -59,6 +65,15 @@ public class MovementData : Data
         writter.Write(position.z);
         return stream.ToArray();
     }
+    public static MovementData Deserialize(BinaryReader reader)
+    {
+        MovementData newMovement = new MovementData(Vector3.zero, "");
+        newMovement.objectName = reader.ReadString();
+        newMovement.position.x = reader.ReadSingle();
+        newMovement.position.y = reader.ReadSingle();
+        newMovement.position.z = reader.ReadSingle();
+        return newMovement;
+    }
 }
 
 public class ChangeSceneData : Data
@@ -76,6 +91,12 @@ public class ChangeSceneData : Data
         writter.Write((byte)dataType);
         writter.Write(sceneIndex);
         return stream.ToArray();
+    }
+    public static ChangeSceneData Deserialize(BinaryReader reader)
+    {
+        ChangeSceneData newSceneData = new ChangeSceneData(0);
+        newSceneData.sceneIndex = reader.ReadInt32();
+        return newSceneData;
     }
 }
 
@@ -99,5 +120,14 @@ public class InstantiateData : Data
         writter.Write(position.y);
         writter.Write(position.z);
         return stream.ToArray();
+    }
+    public static InstantiateData Deserialize(BinaryReader reader)
+    {
+        InstantiateData newInstance = new InstantiateData("", Vector3.zero);
+        newInstance.prefabName = reader.ReadString();
+        newInstance.position.x = reader.ReadSingle();
+        newInstance.position.y = reader.ReadSingle();
+        newInstance.position.z = reader.ReadSingle();
+        return newInstance;
     }
 }

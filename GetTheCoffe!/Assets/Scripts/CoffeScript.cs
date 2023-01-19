@@ -9,7 +9,8 @@ public class CoffeScript : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            FindObjectOfType<MazeSpawner>().GenerateCoffe();
+            MazeSpawner mazeSpawner = FindObjectOfType<MazeSpawner>();
+            mazeSpawner.GenerateCoffe();
             FindObjectOfType<Timer>().AddTime(getTime);
         }
     }

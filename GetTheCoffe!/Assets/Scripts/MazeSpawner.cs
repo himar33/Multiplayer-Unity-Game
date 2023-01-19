@@ -45,6 +45,14 @@ public class MazeSpawner : MonoBehaviour
             SafeDestroy(go.gameObject);
         }
 
+        Vector3 newPos = GetMazePosition();
+        newPos.y += .11f;
+
+        Instantiate(coffe, newPos, coffe.transform.rotation);
+    }
+
+    public Vector3 GetMazePosition()
+    {
         List<Transform> floorList = new List<Transform>();
         for (var i = gameObject.transform.childCount - 1; i >= 0; i--)
         {
@@ -53,7 +61,7 @@ public class MazeSpawner : MonoBehaviour
                 floorList.Add(gameObject.transform.GetChild(i).transform);
             }
         }
-        Instantiate(coffe, floorList[Random.Range(0, floorList.Count)].position, coffe.transform.rotation);
+        return floorList[Random.Range(0, floorList.Count)].position;
     }
 
 #if UNITY_EDITOR

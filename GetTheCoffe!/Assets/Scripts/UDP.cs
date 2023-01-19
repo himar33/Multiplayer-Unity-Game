@@ -25,11 +25,14 @@ public class UDP : MonoBehaviour
     public static UDP instance;
 
     #region Deserialize variables
-    protected bool desMovement = false;
-    protected BinaryReader readerMovement = null;
+    protected bool canDesMovement = false;
+    protected MovementData movementData;
 
-    protected bool desInstantiate = false;
-    protected BinaryReader readerInstantiate = null;
+    protected bool canDesInstantiate = false;
+    protected InstantiateData instantiateData;
+
+    protected bool canChangeScene = false;
+    protected ChangeSceneData sceneData;
     #endregion
 
     public void Awake()
@@ -44,6 +47,28 @@ public class UDP : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(this.gameObject);
     }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.buildIndex == 4)
+        {
+            Vector3 newPlayerPos = FindObjectOfType<MazeSpawner>().GetMazePosition();
+            newPlayerPos.y += 0.3f;
+
+            GameObject playerPrefab = Resources.Load("Player") as GameObject;
+            GameObject newPlayer = Instantiate(playerPrefab, newPlayerPos, playerPrefab.transform.rotation);
+            newPlayer.GetComponent<PlayerController>().isMainPlayer = true;
+
+            Debug.Log(newPlayer.name);
+            if (UDP.instance is UDPServer) newPlayer.name = "ServerPlayer";
+            else newPlayer.name = "ClientPlayer";
+
+            Debug.Log("Player created at: " + newPlayer.transform.position);
+
+            SendString(new InstantiateData("Player", newPlayerPos));
+        }
+    }
+
     public void Start()
     {
         if (chatEvent == null)
@@ -51,10 +76,7 @@ public class UDP : MonoBehaviour
 
         receiveMessage = false;
 
-        if (SceneManager.GetActiveScene().buildIndex == 4)
-        {
-
-        }
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
     public void Update()
     {
@@ -64,17 +86,16 @@ public class UDP : MonoBehaviour
             receiveMessage = false;
         }
 
-        CheckDeserialize("DeserializeMovement", readerMovement, desMovement);
-        CheckDeserialize("DeserializeInstantiate", readerInstantiate, desInstantiate);
+        CheckDeserialize("DeserializeScene", sceneData, canChangeScene);
+        CheckDeserialize("DeserializeInstantiate", instantiateData, canDesInstantiate);
+        CheckDeserialize("DeserializeMovement", movementData, canDesMovement);
     }
 
-    private void CheckDeserialize(string methodName, BinaryReader reader, bool methodBool)
+    public void CheckDeserialize(string methodName, Data data, bool methodBool)
     {
-        if (methodBool && reader != null)
+        if (methodBool)
         {
-            SendMessage(methodName, reader);
-            reader = null;
-            methodBool = false;
+            SendMessage(methodName, data);
         }
     }
 
@@ -96,8 +117,8 @@ public class UDP : MonoBehaviour
         switch (dataType)
         {
             case DataType.Movement:
-                desMovement = true;
-                readerMovement = reader;
+                canDesMovement = true;
+                movementData = MovementData.Deserialize(reader);
                 break;
             case DataType.ChatMessage:
                 string text = reader.ReadString();
@@ -107,51 +128,55 @@ public class UDP : MonoBehaviour
             case DataType.ScoreUpdate:
                 break;
             case DataType.ChangeScene:
-                ChangeScene.GoToScene(reader.ReadInt32());
+                canChangeScene = true;
+                sceneData = ChangeSceneData.Deserialize(reader);
                 break;
             case DataType.Instantiate:
-                desInstantiate = true;
-                readerInstantiate = reader;
+                canDesInstantiate = true;
+                instantiateData = InstantiateData.Deserialize(reader);
                 break;
             default:
                 break;
         }
         Debug.Log(">> Received: " + dataType.ToString());
     }
-    public void DeserializeInstantiate(BinaryReader reader)
+    public void DeserializeInstantiate(InstantiateData reader)
     {
-        GameObject go = Resources.Load(reader.ReadString()) as GameObject;
-
-        Vector3 goPos = new Vector3
+        if (SceneManager.GetActiveScene().buildIndex == 4)
         {
-            x = reader.ReadSingle(),
-            y = reader.ReadSingle(),
-            z = reader.ReadSingle()
-        };
+            GameObject go = Resources.Load(reader.prefabName) as GameObject;
 
-        Instantiate(go, goPos, go.transform.rotation);
+            Vector3 goPos = reader.position;
+
+            GameObject newPlayer = Instantiate(go, goPos, go.transform.rotation);
+
+            if (newPlayer.name == "Player(Clone)")
+            {
+                if (UDP.instance is UDPServer) newPlayer.name = "ClientPlayer";
+                else newPlayer.name = "ServerPlayer";
+            }
+            canDesInstantiate = false;
+        }
     }
 
-    public void DeserializeMovement(BinaryReader reader)
+    public void DeserializeMovement(MovementData reader)
     {
-        GameObject go = GameObject.Find(reader.ReadString());
+        GameObject go = GameObject.Find(reader.objectName);
         if (go)
         {
             if (go.TryGetComponent<PlayerController>(out PlayerController player))
-            {
-                player._input.x = reader.ReadSingle();
-                player._input.y = reader.ReadSingle();
-                player._input.z = reader.ReadSingle();
-            }
+                player._input = reader.position;
             else
-            {
-                Vector3 newPos = new Vector3();
-                newPos.x = reader.ReadSingle();
-                newPos.y = reader.ReadSingle();
-                newPos.z = reader.ReadSingle();
-                go.transform.position = newPos;
-            }
+                go.transform.position = reader.position;
+
+            canDesMovement = false;
         }
+    }
+
+    public void DeserializeScene(ChangeSceneData reader)
+    {
+        ChangeScene.GoToScene(reader.sceneIndex);
+        canChangeScene = false;
     }
     #endregion
 
@@ -163,6 +188,7 @@ public class UDP : MonoBehaviour
             client.Shutdown(SocketShutdown.Both);
             client.Close();
         }
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
 }
