@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -7,12 +6,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Rigidbody _rb;
     [SerializeField] private float _speed = 5;
     [SerializeField] private float _turnSpeed = 360;
+    [SerializeField] private TMP_Text usernameText;
     public bool isMainPlayer = true;
 
     [HideInInspector] public Vector3 _input;
     private Animator animator;
 
-    private void Awake()
+    private void Start()
     {
         animator = GetComponent<Animator>();
         _input = Vector3.zero;
@@ -56,6 +56,11 @@ public class PlayerController : MonoBehaviour
 
         _rb.MovePosition(transform.position + transform.forward * inputSpeed * _speed * Time.deltaTime);
         animator.SetFloat("Speed", inputSpeed);
+    }
+
+    public void SetUsernameText(string _username)
+    {
+        usernameText.text = _username;
     }
 }
 

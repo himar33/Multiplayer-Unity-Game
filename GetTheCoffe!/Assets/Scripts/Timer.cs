@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -20,34 +18,35 @@ public class Timer : MonoBehaviour
     private void Start()
     {
         VolumeProfile profile = volume.sharedProfile;
-        if (!profile.TryGet<ChromaticAberration>(out chromaticAberration))
+        if (profile.TryGet(out chromaticAberration))
         {
-            chromaticAberration = profile.Add<ChromaticAberration>(false);
+            chromaticAberration.intensity.value = 0;
         }
-        chromaticAberration.intensity.value = 0;
+        else
+        {
+            chromaticAberration = profile.Add<ChromaticAberration>();
+            chromaticAberration.intensity.value = 0;
+        }
 
         StartTimer();
     }
 
     void Update()
     {
-        if (timerIsRunning)
+        if (!timerIsRunning) return;
+        if (timeRemaining <= 0)
         {
+            Debug.Log("Timer has run out!");
+            timeRemaining = 0;
+            timerIsRunning = false;
 
-            if (timeRemaining > 0)
-            {
-                if (timeRemaining <= timeEffect) UpdateVolumeEffect();
-
-                timeRemaining -= Time.deltaTime;
-                DisplayTime(timeRemaining);
-            }
-            else
-            {
-                Debug.Log("Timer has run out!");
-                timeRemaining = 0;
-                timerIsRunning = false;
-            }
+            ChangeScene.GoToScene(4);
+            UDP.instance.SendString(new ChangeSceneData(4));
+            return;
         }
+        if (timeRemaining <= timeEffect) UpdateVolumeEffect();
+        timeRemaining -= Time.deltaTime;
+        DisplayTime(timeRemaining);
     }
 
     private void UpdateVolumeEffect()
@@ -63,10 +62,10 @@ public class Timer : MonoBehaviour
 
     void DisplayTime(float timeToDisplay)
     {
-        timeToDisplay += 1;
-        float minutes = Mathf.FloorToInt(timeToDisplay / 60);
-        float seconds = Mathf.FloorToInt(timeToDisplay % 60);
-        timeText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+        timeToDisplay = Mathf.Max(timeToDisplay, 0);
+        int minutes = (int)timeToDisplay / 60;
+        int seconds = (int)timeToDisplay % 60;
+        timeText.text = $"{minutes:00}:{seconds:00}";
     }
 
     public void StartTimer()

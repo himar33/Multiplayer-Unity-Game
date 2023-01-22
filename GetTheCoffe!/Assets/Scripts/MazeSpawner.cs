@@ -38,7 +38,7 @@ public class MazeSpawner : MonoBehaviour
         return null;
     }
 
-    public void GenerateCoffe()
+    public GameObject GenerateCoffe()
     {
         foreach (CoffeScript go in FindObjectsOfType<CoffeScript>() as CoffeScript[])
         {
@@ -48,7 +48,7 @@ public class MazeSpawner : MonoBehaviour
         Vector3 newPos = GetMazePosition();
         newPos.y += .11f;
 
-        Instantiate(coffe, newPos, coffe.transform.rotation);
+        return Instantiate(coffe, newPos, coffe.transform.rotation);
     }
 
     public Vector3 GetMazePosition()

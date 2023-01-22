@@ -2,13 +2,9 @@ using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using UnityEngine.Events;
-using System.IO;
 
 public class UDPServer : UDP
 {
-    public string serverName;
-
     public override void JoinServer()
     {
         Debug.Log("UDP Server Initializing");
@@ -28,11 +24,6 @@ public class UDPServer : UDP
             IsBackground = true
         };
         receiveThread.Start();
-    }
-
-    public void SetServerName(string n)
-    {
-        serverName = n;
     }
 
     public override void SendString(Data data)

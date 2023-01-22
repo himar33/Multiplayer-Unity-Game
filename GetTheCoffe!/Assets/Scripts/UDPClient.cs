@@ -24,7 +24,7 @@ public class UDPClient : UDP
         IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
         endPoint = sender;
 
-        receiveThread = new Thread(new ThreadStart(ReceiveData))
+        receiveThread = new Thread(ReceiveData)
         {
             IsBackground = true
         };
@@ -49,9 +49,7 @@ public class UDPClient : UDP
 
     public override void ReceiveData()
     {
-        bool canReceive = true;
-
-        while (canReceive)
+        while (true)
         {
             try
             {
@@ -63,7 +61,7 @@ public class UDPClient : UDP
             catch (System.Exception err)
             {
                 Debug.Log(err.ToString());
-                canReceive = false;
+                break;
             }
         }
     }

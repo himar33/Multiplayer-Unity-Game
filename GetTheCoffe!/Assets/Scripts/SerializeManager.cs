@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using UnityEngine;
 
 public enum DataType
@@ -11,7 +7,8 @@ public enum DataType
     ChatMessage,
     ScoreUpdate,
     ChangeScene,
-    Instantiate
+    Instantiate,
+    RemoveObject
 }
 
 public abstract class Data
@@ -30,17 +27,15 @@ public class MessageData : Data
     }
     public override byte[] Serialize()
     {
-        MemoryStream stream = new MemoryStream();
-        BinaryWriter writter = new BinaryWriter(stream);
+        using var stream = new MemoryStream();
+        using var writter = new BinaryWriter(stream);
         writter.Write((byte)dataType);
         writter.Write(message);
         return stream.ToArray();
     }
     public static MessageData Deserialize(BinaryReader reader)
     {
-        MessageData newMessage = new MessageData();
-        newMessage.message = reader.ReadString();
-        return newMessage;
+        return new MessageData(reader.ReadString());
     }
 }
 
@@ -56,23 +51,18 @@ public class MovementData : Data
     }
     public override byte[] Serialize()
     {
-        MemoryStream stream = new MemoryStream();
-        BinaryWriter writter = new BinaryWriter(stream);
+        using var stream = new MemoryStream();
+        using var writter = new BinaryWriter(stream);
         writter.Write((byte)dataType);
-        writter.Write(objectName);
         writter.Write(position.x);
         writter.Write(position.y);
         writter.Write(position.z);
+        writter.Write(objectName);
         return stream.ToArray();
     }
     public static MovementData Deserialize(BinaryReader reader)
     {
-        MovementData newMovement = new MovementData(Vector3.zero, "");
-        newMovement.objectName = reader.ReadString();
-        newMovement.position.x = reader.ReadSingle();
-        newMovement.position.y = reader.ReadSingle();
-        newMovement.position.z = reader.ReadSingle();
-        return newMovement;
+        return new MovementData(new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()), reader.ReadString());
     }
 }
 
@@ -86,48 +76,66 @@ public class ChangeSceneData : Data
     }
     public override byte[] Serialize()
     {
-        MemoryStream stream = new MemoryStream();
-        BinaryWriter writter = new BinaryWriter(stream);
+        using var stream = new MemoryStream();
+        using var writter = new BinaryWriter(stream);
         writter.Write((byte)dataType);
         writter.Write(sceneIndex);
         return stream.ToArray();
     }
     public static ChangeSceneData Deserialize(BinaryReader reader)
     {
-        ChangeSceneData newSceneData = new ChangeSceneData(0);
-        newSceneData.sceneIndex = reader.ReadInt32();
-        return newSceneData;
+        return new ChangeSceneData(reader.ReadInt32());
     }
 }
 
 public class InstantiateData : Data
 {
     public string prefabName;
+    public string username;
     public Vector3 position;
-    public InstantiateData(string _prefabName, Vector3 _position)
+    public InstantiateData(string _prefabName, Vector3 _position, string _username = "")
     {
         prefabName = _prefabName;
         position = _position;
+        username = _username;
         dataType = DataType.Instantiate;
     }
     public override byte[] Serialize()
     {
-        MemoryStream stream = new MemoryStream();
-        BinaryWriter writter = new BinaryWriter(stream);
+        using var stream = new MemoryStream();
+        using var writter = new BinaryWriter(stream);
         writter.Write((byte)dataType);
         writter.Write(prefabName);
         writter.Write(position.x);
         writter.Write(position.y);
         writter.Write(position.z);
+        writter.Write(username);
         return stream.ToArray();
     }
     public static InstantiateData Deserialize(BinaryReader reader)
     {
-        InstantiateData newInstance = new InstantiateData("", Vector3.zero);
-        newInstance.prefabName = reader.ReadString();
-        newInstance.position.x = reader.ReadSingle();
-        newInstance.position.y = reader.ReadSingle();
-        newInstance.position.z = reader.ReadSingle();
-        return newInstance;
+        return new InstantiateData(reader.ReadString(), new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()), reader.ReadString());
+    }
+}
+
+public class RemoveObjectData : Data
+{
+    public string objectName;
+    public RemoveObjectData(string _objectName)
+    {
+        objectName = _objectName;
+        dataType = DataType.RemoveObject;
+    }
+    public override byte[] Serialize()
+    {
+        using var stream = new MemoryStream();
+        using var writter = new BinaryWriter(stream);
+        writter.Write((byte)dataType);
+        writter.Write(objectName);
+        return stream.ToArray();
+    }
+    public static RemoveObjectData Deserialize(BinaryReader reader)
+    {
+        return new RemoveObjectData(reader.ReadString());
     }
 }
