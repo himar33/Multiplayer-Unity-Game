@@ -7,6 +7,7 @@ public class ChangeScene : MonoBehaviour
 {
     public static void GoToScene(int index)
     {
+        AudioManager.instance.PlaySound(AudioManager.instance.buttonSound);
         SceneManager.LoadScene(index);
     }
 }
