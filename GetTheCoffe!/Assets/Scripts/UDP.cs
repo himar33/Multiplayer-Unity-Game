@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -15,7 +16,15 @@ public class UDP : MonoBehaviour
     public UnityEvent<string> chatEvent;
 
     public string username;
-    public int points;
+
+    [System.Serializable]
+    public class VariableTMPPair
+    {
+        public int variable;
+        public TMP_Text textMeshPro;
+    }
+
+    public List<VariableTMPPair> variableTMPPairs;
 
     protected int recv;
     protected byte[] data;
@@ -34,6 +43,7 @@ public class UDP : MonoBehaviour
     protected List<InstantiateData> instantiateData = new List<InstantiateData>();
     protected List<ChangeSceneData> sceneData = new List<ChangeSceneData>();
     protected List<RemoveObjectData> removeData = new List<RemoveObjectData>();
+    protected List<AddPointData> addPointData = new List<AddPointData>();
     #endregion
 
     public void Awake()
@@ -63,6 +73,24 @@ public class UDP : MonoBehaviour
         PlayerController playerController = newPlayer.GetComponent<PlayerController>();
         playerController.isMainPlayer = true;
         playerController.SetUsernameText(username);
+
+        Transform userpoints = GameObject.FindGameObjectWithTag("Userpoints").transform;
+        userpoints.parent.GetComponent<TMP_Text>().text = username;
+
+        if (variableTMPPairs.Count <= 0)
+        {
+            variableTMPPairs = new List<VariableTMPPair>();
+            variableTMPPairs.Add(new VariableTMPPair { variable = 0, textMeshPro = userpoints.GetComponent<TMP_Text>() });
+            variableTMPPairs.Add(new VariableTMPPair { variable = 0, textMeshPro = GameObject.FindGameObjectWithTag("Enemypoints").GetComponent<TMP_Text>() });
+        }
+        else
+        {
+            variableTMPPairs[0].textMeshPro = userpoints.GetComponent<TMP_Text>();
+            variableTMPPairs[0].textMeshPro.text = variableTMPPairs[0].variable.ToString();
+
+            variableTMPPairs[1].textMeshPro = GameObject.FindGameObjectWithTag("Enemypoints").GetComponent<TMP_Text>();
+            variableTMPPairs[1].textMeshPro.text = variableTMPPairs[1].variable.ToString();
+        }
 
         if (UDP.instance is UDPServer)
         {
@@ -129,6 +157,14 @@ public class UDP : MonoBehaviour
                 removeData.RemoveAt(i);
             }
         }
+        if (addPointData.Count > 0)
+        {
+            for (int i = addPointData.Count - 1; i >= 0; i--)
+            {
+                DeserializeAddPoint();
+                addPointData.RemoveAt(i);
+            }
+        }
     }
 
     public virtual void JoinServer() { }
@@ -156,6 +192,7 @@ public class UDP : MonoBehaviour
                 receiveMessage = true;
                 break;
             case DataType.ScoreUpdate:
+                addPointData.Add(AddPointData.Deserialize());
                 break;
             case DataType.ChangeScene:
                 sceneData.Add(ChangeSceneData.Deserialize(reader));
@@ -184,14 +221,16 @@ public class UDP : MonoBehaviour
         if (newPlayer.name == "Player(Clone)")
         {
             newPlayer.name = UDP.instance is UDPServer ? "ClientPlayer" : "ServerPlayer";
-            newPlayer.GetComponent<PlayerController>().SetUsernameText(reader.username);
+            PlayerController player = newPlayer.GetComponent<PlayerController>();
+            player.SetUsernameText(reader.username);
+            GameObject.FindGameObjectWithTag("Enemypoints").transform.parent.GetComponent<TMP_Text>().text = reader.username;
         }
     }
 
     public void DeserializeMovement(MovementData reader)
     {
-        var go = GameObject.Find(reader.objectName);
-        if (!go) return;
+        GameObject go = GameObject.Find(reader.objectName);
+        if (go == null) return;
 
         if (go.TryGetComponent<PlayerController>(out var player))
         {
@@ -215,6 +254,15 @@ public class UDP : MonoBehaviour
         {
             Destroy(go);
         }
+    }
+
+    public void DeserializeAddPoint()
+    {
+        variableTMPPairs[0].variable += 1;
+        variableTMPPairs[0].textMeshPro.text = variableTMPPairs[0].variable.ToString();
+
+        ChangeScene.GoToScene(4);
+        SendString(new ChangeSceneData(4));
     }
     #endregion
 

@@ -40,8 +40,9 @@ public class Timer : MonoBehaviour
             timeRemaining = 0;
             timerIsRunning = false;
 
-            ChangeScene.GoToScene(4);
-            UDP.instance.SendString(new ChangeSceneData(4));
+            UDP.instance.variableTMPPairs[1].variable += 1;
+            UDP.instance.variableTMPPairs[1].textMeshPro.text = UDP.instance.variableTMPPairs[1].variable.ToString();
+            UDP.instance.SendString(new AddPointData());
             return;
         }
         if (timeRemaining <= timeEffect) UpdateVolumeEffect();

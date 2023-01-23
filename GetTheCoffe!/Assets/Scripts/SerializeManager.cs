@@ -8,7 +8,7 @@ public enum DataType
     ScoreUpdate,
     ChangeScene,
     Instantiate,
-    RemoveObject
+    RemoveObject,
 }
 
 public abstract class Data
@@ -137,5 +137,24 @@ public class RemoveObjectData : Data
     public static RemoveObjectData Deserialize(BinaryReader reader)
     {
         return new RemoveObjectData(reader.ReadString());
+    }
+}
+
+public class AddPointData : Data
+{
+    public AddPointData()
+    {
+        dataType = DataType.ScoreUpdate;
+    }
+    public override byte[] Serialize()
+    {
+        using var stream = new MemoryStream();
+        using var writter = new BinaryWriter(stream);
+        writter.Write((byte)dataType);
+        return stream.ToArray();
+    }
+    public static AddPointData Deserialize()
+    {
+        return new AddPointData();
     }
 }
